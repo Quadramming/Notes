@@ -4,7 +4,7 @@
 		<title>Notes</title>
 		<meta charset='utf-8'>
 		<style type='text/css'>
-			textarea { width: 90% }
+			textarea { width: 90%; font-family: Courier; font-weight: bold; font-size: 15px }
 			body { text-align: center }
 		</style>
 		<script type='text/javascript' src='jquery-3.3.1.min.js'></script>
