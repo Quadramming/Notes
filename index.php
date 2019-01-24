@@ -21,6 +21,7 @@
 				id('text').focus();
 				id('text').selectionStart = 0;
 				id('text').selectionEnd = 0;
+				$('#text').scrollTop(0);
 			}
 			
 			function setText(text) {
@@ -39,7 +40,7 @@
 			}
 			
 			function doSave() {
-				const textToSave = id('text').value;
+				const textToSave = btoa( id('text').value );
 				if ( textToSave === actualText ) {
 					return;
 				}
@@ -47,14 +48,14 @@
 					if ( data.result === true ) {
 						doLoad();
 					} else {
-						alert('Some error happend');
+						alert('Some error occurred');
 					}
 				}, 'json');
 			}
 			
 			function doLoad() {
 				jQuery.get('notes.txt', function(text) {
-					setText(text);
+					setText(atob(text));
 				});
 			}
 			
@@ -80,13 +81,17 @@
 				} else {
 					$('#saveIco').attr('src', 'imgs/save.png');
 				}
+				const textArea = $('#text');
+				const textAreaSize = $(window).height() - $('#text').position().top - 25;
+				if ( textArea.height() !== textAreaSize ) {
+					textArea.height(textAreaSize);
+				}
 			}
 			
 			window.addEventListener('load', function(event) {
 				addEventListener('keydown', onKeyDown);
 				tick();
 				doLoad();
-				$('#text').height( $(window).height()*0.80 );
 			});
 			
 		</script>
