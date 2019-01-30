@@ -3,6 +3,7 @@
 	<head>
 		<title>Notes</title>
 		<meta charset='utf-8'>
+		<link rel='icon' type='image/gif' sizes='16x16' href='data:image/gif;base64,R0lGODlhEAAQAIABAAAAAP///yH5BAEKAAEALAAAAAAQABAAAAIjhI8WG+m6EJsNxEMVllM/yjziSHJgh50opF5sa8JpW5X2WAAAOw=='>
 		<style type='text/css'>
 			textarea { width: 90%; font-family: Courier; font-weight: bold; font-size: 15px }
 			body { text-align: center }
@@ -10,7 +11,12 @@
 		<script type='text/javascript' src='jquery-3.3.1.min.js'></script>
 		<script type='text/javascript'>
 			
+			console.log('Version: 1.1');
 			let actualText = '';
+			
+			function isChanged() {
+				return id('text').value !== actualText;
+			}
 			
 			function toNum(str) {
 				let nums = '';
@@ -62,10 +68,10 @@
 			}
 			
 			function doSave() {
-				const textToSave = toNum( id('text').value );
-				if ( textToSave === actualText ) {
+				if ( ! isChanged() ) {
 					return;
 				}
+				const textToSave = toNum( id('text').value );
 				$.post( 'notes.php', { text: textToSave }, function( data ) {
 					if ( data.result === true ) {
 						doLoad();
@@ -76,13 +82,14 @@
 			}
 			
 			function doLoad() {
-				jQuery.get('notes.txt', function(text) {
+				const antiCache = new Date().valueOf()+''+Math.random();
+				jQuery.get('notes.txt?antiCache='+antiCache, function(text) {
 					setText(fromNum(text));
 				});
 			}
 			
 			function doReload() {
-				if ( window.confirm('Are you sure?') ) {
+				if ( ! isChanged() || window.confirm('Are you sure?') ) {
 					doLoad();
 				}
 			}
@@ -98,10 +105,10 @@
 			
 			function tick() {
 				window.setTimeout( () => requestAnimationFrame(tick), 100 );
-				if ( id('text').value === actualText ) {
-					$('#saveIco').attr('src', 'imgs/noSave.png');
-				} else {
+				if ( isChanged() ) {
 					$('#saveIco').attr('src', 'imgs/save.png');
+				} else {
+					$('#saveIco').attr('src', 'imgs/noSave.png');
 				}
 				const textArea = $('#text');
 				const textAreaSize = $(window).height() - $('#text').position().top - 25;
@@ -109,6 +116,12 @@
 					textArea.height(textAreaSize);
 				}
 			}
+			
+			window.addEventListener('beforeunload', function (event) {
+				if ( isChanged() ) {
+					event.returnValue = 'You should save file!';
+				}
+			});
 			
 			window.addEventListener('load', function(event) {
 				addEventListener('keydown', onKeyDown);
