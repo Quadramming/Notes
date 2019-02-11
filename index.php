@@ -13,6 +13,7 @@
 			
 			console.log('Version: 1.1');
 			let actualText = '';
+			let disabledSave = true;
 			
 			function isChanged() {
 				return id('text').value !== actualText;
@@ -68,23 +69,30 @@
 			}
 			
 			function doSave() {
+				if ( disabledSave ) {
+					return;
+				}
 				if ( ! isChanged() ) {
 					return;
 				}
 				const textToSave = toNum( id('text').value );
+				disabledSave = true;
 				$.post( 'notes.php', { text: textToSave }, function( data ) {
 					if ( data.result === true ) {
 						doLoad();
 					} else {
+						disabledSave = false;
 						alert('Some error occurred');
 					}
 				}, 'json');
+				update();
 			}
 			
 			function doLoad() {
 				const antiCache = new Date().valueOf()+''+Math.random();
 				jQuery.get('notes.txt?antiCache='+antiCache, function(text) {
 					setText(fromNum(text));
+					disabledSave = false;
 				});
 			}
 			
@@ -103,9 +111,23 @@
 				}
 			}
 			
-			function tick() {
-				window.setTimeout( () => requestAnimationFrame(tick), 100 );
-				if ( isChanged() ) {
+			function doUnique() {
+				const text = id('text').value;
+				let lines = text.split('\n');
+				lines = [...new Set(lines)];
+				id('text').value = lines.join('\n');
+			}
+			
+			function doCase(big = true) {
+				if ( big ) {
+					id('text').value = id('text').value.toUpperCase();
+				} else {
+					id('text').value = id('text').value.toLowerCase();
+				}
+			}
+			
+			function update() {
+				if ( isChanged() && ! disabledSave ) {
 					$('#saveIco').attr('src', 'imgs/save.png');
 				} else {
 					$('#saveIco').attr('src', 'imgs/noSave.png');
@@ -115,6 +137,11 @@
 				if ( textArea.height() !== textAreaSize ) {
 					textArea.height(textAreaSize);
 				}
+			}
+			
+			function tick() {
+				window.setTimeout( () => requestAnimationFrame(tick), 500 );
+				update();
 			}
 			
 			window.addEventListener('beforeunload', function (event) {
@@ -137,6 +164,9 @@
 		<a href='#' onclick='doReload()'><img src='imgs/reload.png'></a>
 		<a href='#' onclick='doSort()'><img src='imgs/sortAZ.png'></a>
 		<a href='#' onclick='doSort(true)'><img src='imgs/sortZA.png'></a>
+		<a href='#' onclick='doUnique()'><img src='imgs/2.png'></a>
+		<a href='#' onclick='doCase()'><img src='imgs/up.png'></a>
+		<a href='#' onclick='doCase(false)'><img src='imgs/down.png'></a>
 		<br>
 		<textarea id='text'></textarea>
 	</body>
