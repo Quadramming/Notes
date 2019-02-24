@@ -1,4 +1,5 @@
 <?php
+	//Sleep(1); // For debug purpose
 	if ( isset( $_REQUEST['text'] ) ) {
 		$name = uniqid(time().'_', true);
 		if ( @copy('notes.txt', 'history/'.$name) ) {
