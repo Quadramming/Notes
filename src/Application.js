@@ -37,7 +37,7 @@ export default class {
 		jQuery.get('notes.txt?antiCache='+antiCache(), (text) => {
 			this.text.actualize(Num.from(text));
 			this.saveBt.lock('nomodify');
-			this.status.set('ready', 'green');
+			this.status.set('ready', 'green', true);
 			this.saveBt.unlock('load');
 		});
 	}
